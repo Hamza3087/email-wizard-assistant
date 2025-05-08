@@ -47,7 +47,6 @@ coverage.xml
 .ipynb_checkpoints
 
 # Environment
-.env
 .venv
 env/
 venv/
@@ -57,9 +56,10 @@ venv.bak/
 
 # IDE specific files
 .idea/
-.vscode/
 *.swp
 *.swo
 
 # Project specific
 data/embeddings.pkl
+config.bat
+node_modules

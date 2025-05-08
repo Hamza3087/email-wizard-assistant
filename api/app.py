@@ -3,10 +3,11 @@ Main Flask application for the Email Wizard Assistant.
 """
 
 from flask import Flask
+from flask_cors import CORS
 import logging
 import os
 from dotenv import load_dotenv
-from api.routes import api_bp
+from routes import api_bp
 
 # Load environment variables
 load_dotenv()
@@ -25,18 +26,21 @@ logger = logging.getLogger(__name__)
 def create_app():
     """
     Create and configure the Flask application.
-    
+
     Returns:
         Flask: Configured Flask application.
     """
     app = Flask(__name__)
-    
+
+    # Enable CORS for all routes
+    CORS(app)
+
     # Register blueprints
     app.register_blueprint(api_bp)
-    
+
     # Log application startup
     logger.info("Email Wizard Assistant API started")
-    
+
     return app
 
 if __name__ == "__main__":
