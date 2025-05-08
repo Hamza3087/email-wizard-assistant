@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Wizard Assistant - Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #response {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            white-space: pre-wrap;
+            display: none;
+        }
+        .email-result {
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f5f5f5;
+        }
+    </style>
+</head>
+<body>
+    <h1>Email Wizard Assistant - Test Interface</h1>
+    
+    <div class="container">
+        <div class="form-group">
+            <label for="query">Enter your email query:</label>
+            <input type="text" id="query" placeholder="e.g., What's the status of our project?">
+        </div>
+        
+        <button onclick="sendQuery()">Send Query</button>
+        
+        <div id="loading" style="display: none; margin-top: 15px;">
+            Processing query... This may take a few moments.
+        </div>
+        
+        <div id="response"></div>
+    </div>
+    
+    <script>
+        function sendQuery() {
+            const query = document.getElementById('query').value;
+            if (!query) {
+                alert('Please enter a query');
+                return;
+            }
+            
+            const responseDiv = document.getElementById('response');
+            const loadingDiv = document.getElementById('loading');
+            
+            // Show loading message
+            loadingDiv.style.display = 'block';
+            responseDiv.style.display = 'none';
+            
+            // Send request to API
+            fetch('http://127.0.0.1:5000/query_email', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ query: query })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok: ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Hide loading message
+                loadingDiv.style.display = 'none';
+                
+                // Format and display response
+                let html = `<h3>Generated Response:</h3>
+                <p>${data.response}</p>
+                
+                <h3>Retrieved Emails:</h3>`;
+                
+                data.retrieved_emails.forEach((email, index) => {
+                    html += `
+                    <div class="email-result">
+                        <strong>Email ${index + 1}:</strong> ${email.subject}<br>
+                        <strong>Similarity:</strong> ${(email.similarity * 100).toFixed(2)}%<br>
+                        <strong>Snippet:</strong> ${email.snippet}
+                    </div>`;
+                });
+                
+                html += `<p><strong>Processing Time:</strong> ${data.processing_time_ms} ms</p>`;
+                
+                responseDiv.innerHTML = html;
+                responseDiv.style.display = 'block';
+            })
+            .catch(error => {
+                // Hide loading message
+                loadingDiv.style.display = 'none';
+                
+                // Display error
+                responseDiv.innerHTML = `<h3>Error:</h3><p>${error.message}</p>`;
+                responseDiv.style.display = 'block';
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</body>
+</html>
